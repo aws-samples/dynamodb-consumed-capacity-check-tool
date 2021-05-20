@@ -1,4 +1,4 @@
-# dynamodb-simple-benchmark
+# dynamodb-consumed-capacity-check-tool
 
 How to Use
 This tool needs AWS credentials or DynamoDB PUT/GET permission role. Check the authentication method when using the AWS SDK, if necessary.
