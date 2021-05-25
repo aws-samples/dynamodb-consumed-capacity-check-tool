@@ -100,7 +100,7 @@ func initParams() Params {
 	params.SeqSK = flag.Bool("seqsk", false, "bool:generate sequence sk data(ex:SK_1,SK_2...) or fix string")
 	flag.Parse()
 
-	fmt.Println("Init params", *params.SeqPK, *params.SeqSK)
+	//fmt.Println("Init params", *params.SeqPK, *params.SeqSK)
 
 	return params
 }
