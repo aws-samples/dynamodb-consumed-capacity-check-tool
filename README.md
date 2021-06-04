@@ -3,8 +3,9 @@
 ## How to use it
 This tool requires an AWS credentials to access DynamoDB API. You need to configure an AWS credential where you required DynamoDB permissions. See details: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html
 ```
-git clone https://github.com/oranie/dynamodb-simple-benchmark.git
-cd ./dynamodb-simple-benchmark/
+sudo yum install golang git
+git clone git@github.com:aws-samples/dynamodb-consumed-capacity-check-tool.git
+cd ./dynamodb-consumed-capacity-check-tool
 go build ./
 ./dynamodb-simple-benchmark -seqpk=true  -seqsk=true -table=benchmark -con=2 -max=10000 -datasize=100 -pk=US -sk=20200101120001 -region=ap-northeast-1 
 
