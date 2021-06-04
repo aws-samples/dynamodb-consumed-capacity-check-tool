@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/oranie/dynamodb-simple-benchmark/lib"
+	"github.com/aws-samples/dynamodb-consumed-capacity-check-tool/lib"
 )
 
 type Params struct {

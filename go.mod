@@ -1,4 +1,4 @@
-module github.com/oranie/dynamodb-simple-benchmark
+module github.com/aws-samples/dynamodb-consumed-capacity-check-tool
 
 go 1.15
 
