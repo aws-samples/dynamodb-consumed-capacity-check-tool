@@ -2,16 +2,18 @@
 
 ## How to use it
 This tool requires an AWS credentials to access DynamoDB API. You need to configure an AWS credential where you required DynamoDB permissions. See details: https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html
+
 ```
+Here is an example running on Amazon Linux 2 and set EC2 role (allow DynamoDB PUT/GET)
+
 sudo yum install golang git
 git clone git@github.com:aws-samples/dynamodb-consumed-capacity-check-tool.git
 cd ./dynamodb-consumed-capacity-check-tool
 go build ./
-./dynamodb-simple-benchmark -seqpk=true  -seqsk=true -table=benchmark -con=2 -max=10000 -datasize=100 -pk=US -sk=20200101120001 -region=ap-northeast-1 
-
+./dynamodb-consumed-capacity-check-tool -seqpk=true  -seqsk=true -table=benchmark -con=2 -max=10000 -datasize=100 -pk=US -sk=20200101120001 -region=ap-northeast-1 
 ```
 
-option
+## option
 ```bash
   -con int
     	Concurrent Request No (default 2)
@@ -33,9 +35,14 @@ option
   -table string
     	Use DynamoDB table name (default "benchmark")
 
+
+sample run command
+
+```
+### sample result
+```
 go run ./main.go -seqpk=true  -seqsk=true -table=benchmark_pro -con=2 -max=1 -pk=US -sk=20200101120001 -region=ap-northeast-1
 
-###sample result
 
 Init params true true
 Set params tableName:benchmark concurrentNo:4 maxRequest:10 partitionKey:test sortKey:20200101120001 awsRegion:ap-northeast-1 generatePK:true generateSK:true
@@ -84,8 +91,6 @@ GET:4 (RoundDown)
 Set params tableName:benchmark concurrentNo:4 maxRequest:10 partitionKey:test sortKey:20200101120001 awsRegion:ap-northeast-1 generatePK:true generateSK:true
 
 Process finished with exit code 0
-
-
 ```
 This tool is intended for testing simple workload. With this tool, you can achieve followings:
 
@@ -94,6 +99,7 @@ This tool is intended for testing simple workload. With this tool, you can achie
 * Set the number of requests
 
 I created this primarily to confirm the mechanism.
+
 https://aws.amazon.com/jp/about-aws/whats-new/2019/11/amazon-dynamodb-adaptive-capacity-now-handles-imbalanced-workloads-better-by-isolating-frequently-accessed-items-automatically/
 
 
