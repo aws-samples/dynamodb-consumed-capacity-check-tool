@@ -52,9 +52,9 @@ sample run command
 -seqpk=true \ <- partition key value  : sequencial increment (US_1,US_2...)
 -seqsk=true \ <- sort key value  : sequencial increment (20200101120001_1,20200101120001_2...)
 -table=benchmark \ <- table name
--con=2 \ <- concurent request gorutine : 2
--max=10000 \ <- Request limit count
--datasize=100 \ <- test data size 100 bytes
+-con=2 \ <- concurent request gorutine count: 2
+-max=10000 \ <- Request limit count is 10,000 
+-datasize=100 \ <- test data size is 100 bytes
 -pk=US \ <- partition key base string : US
 -sk=20200101120001 \ sort key base string : 20200101120001
 -region=ap-northeast-1 <- AWS region is ap-northeast-1
