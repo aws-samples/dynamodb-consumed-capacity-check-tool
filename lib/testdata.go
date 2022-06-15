@@ -45,11 +45,11 @@ func makeTestKeyString(count string, partitionKey string, sortKey string, seqPK 
 		pk = partitionKey + "_" + count
 		sk = sortKey + "_" + count
 	case seqSK == true && seqPK == false:
-		pk = partitionKey + "_" + count
+		pk = partitionKey
 		sk = sortKey
 	case seqSK == false && seqPK == true:
-		pk = partitionKey
-		sk = sortKey + "_" + count
+		pk = partitionKey + "_" + count
+		sk = sortKey
 	case seqSK == false && seqPK == false:
 		pk = partitionKey
 		sk = sortKey
