@@ -22,6 +22,8 @@ type Params struct {
 	AwsRegion    *string
 	SeqPK        *bool
 	SeqSK        *bool
+	EnableDax    *bool
+	DAXEndpoint  *string
 }
 
 func main() {
@@ -53,7 +55,9 @@ func main() {
 			}
 			fmt.Printf("PUT benchmark test start\n")
 			putResult := lib.PutData(&allReq, &successReq, &errorReq, *params.MaxRequest, *params.TestDataSize,
-				*params.TableName, *params.AwsRegion, testData, threadStartIndex, threadCount)
+				*params.TableName, *params.AwsRegion, *params.EnableDax, *params.DAXEndpoint, testData,
+				threadStartIndex,
+				threadCount)
 
 			atomic.AddUint64(&putConsumedCapacity, uint64(putResult))
 
@@ -90,6 +94,8 @@ func main() {
 func initParams() Params {
 	var params Params
 	params.TableName = flag.String("table", "benchmark", "Use DynamoDB table name")
+	params.EnableDax = flag.Bool("dax", false, "Enable DAX Cluster")
+	params.DAXEndpoint = flag.String("daxendpoint", "dax:sampleEndpoint", "DAX Endpoint")
 	params.ConcurrentNo = flag.Int("con", 2, "Concurrent Request No")
 	params.MaxRequest = flag.Int("max", 100, "max Request count")
 	params.PartitionKey = flag.String("pk", "pk", "partition key string")
@@ -98,6 +104,7 @@ func initParams() Params {
 	params.AwsRegion = flag.String("region", "ap-northeast-1", "Use aws region")
 	params.SeqPK = flag.Bool("seqpk", false, "bool:generate sequence pk data(ex:PK_1,PK_2...) or fix string")
 	params.SeqSK = flag.Bool("seqsk", false, "bool:generate sequence sk data(ex:SK_1,SK_2...) or fix string")
+
 	flag.Parse()
 
 	//fmt.Println("Init params", *params.SeqPK, *params.SeqSK)

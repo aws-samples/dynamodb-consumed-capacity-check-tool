@@ -9,11 +9,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+
+	"github.com/aws/aws-dax-go/dax"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 func init() {
@@ -31,7 +32,8 @@ func makeTestData(n int) string {
 }
 
 func PutData(allReq *uint32, successReq *uint32, errorReq *uint32, maxRequest int, dataSize int,
-	tableName string, awsRegion string, testData []item, threadStartIndex int, threadCount int) (putConsumedCapacity float64) {
+	tableName string, awsRegion string, enableDax bool, DAXEndpoint string, testData []item, threadStartIndex int,
+	threadCount int) (putConsumedCapacity float64) {
 	fmt.Printf("PUT start child execute : time:%v,Counter:%v,MaxRequets:%v\n",
 		time.Now(), atomic.LoadUint32(allReq), maxRequest)
 
@@ -43,6 +45,8 @@ func PutData(allReq *uint32, successReq *uint32, errorReq *uint32, maxRequest in
 	}
 	svc := dynamodb.New(sess, aws.NewConfig().WithMaxRetries(0))
 
+	//svc := createDAXClinet(awsRegion)
+
 	var grCount int
 
 	fmt.Println("PUT This goroutine  threadStartIndex:", threadStartIndex, "threadCount:", threadCount)
@@ -51,7 +55,7 @@ func PutData(allReq *uint32, successReq *uint32, errorReq *uint32, maxRequest in
 		putData := makePutTestData(tableName, item.Pk, item.Sk, makeTestData(dataSize))
 		result, err := svc.PutItem(putData)
 
-		if result != nil {
+		if result.ConsumedCapacity.CapacityUnits != nil {
 			putConsumedCapacity = putConsumedCapacity + *result.ConsumedCapacity.CapacityUnits
 		}
 		if err != nil {
@@ -99,12 +103,13 @@ func GetData(allReq *uint32, successReq *uint32, errorReq *uint32, maxRequest in
 		time.Now(), atomic.LoadUint32(allReq), maxRequest)
 
 	sess, err := session.NewSession(&aws.Config{Region: aws.String(awsRegion)})
-
 	if err != nil {
 		fmt.Println("GET Got session error:", err.Error())
 		os.Exit(1)
 	}
 	svc := dynamodb.New(sess, aws.NewConfig().WithMaxRetries(0))
+
+	//svc := createDAXClinet(awsRegion)
 
 	var grCount int
 
@@ -113,7 +118,7 @@ func GetData(allReq *uint32, successReq *uint32, errorReq *uint32, maxRequest in
 		item := testData[i]
 		getData := makeGetTestData(tableName, item.Pk, item.Sk)
 		result, err := svc.GetItem(getData)
-		if result != nil {
+		if result.ConsumedCapacity.CapacityUnits != nil {
 			getConsumedCapacity = getConsumedCapacity + *result.ConsumedCapacity.CapacityUnits
 		}
 		if err != nil {
@@ -161,4 +166,15 @@ func AddFloat64(val *float64, delta float64) (new float64) {
 		}
 	}
 	return
+}
+
+func createDAXClinet(awsRegion string) (svc *dax.Dax) {
+	cfg := dax.DefaultConfig()
+	cfg.ReadRetries = 0
+	cfg.WriteRetries = 0
+	cfg.MaxPendingConnectionsPerHost = 100
+	cfg.HostPorts = []string{"dax://stress.ab0uwo.dax-clusters.ap-northeast-1.amazonaws.com:8111"}
+	cfg.Region = awsRegion
+	svc, _ = dax.New(cfg)
+	return svc
 }
