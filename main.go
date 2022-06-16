@@ -42,7 +42,7 @@ func main() {
 	ticker(&allReq, &successReq, &errorReq)
 	threadCount := len(testData) / *params.ConcurrentNo
 
-	fmt.Printf("All test request:%v,Concurrent:%v,1thread count:%v",
+	fmt.Printf("All test request:%v,Concurrent:%v,1thread count:%v\n",
 		len(testData), *params.ConcurrentNo, threadCount)
 
 	wg := sync.WaitGroup{}
