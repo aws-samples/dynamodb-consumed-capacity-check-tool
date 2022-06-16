@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/aws/aws-dax-go v1.2.9
-	github.com/aws/aws-sdk-go v1.44.34
+	github.com/aws/aws-sdk-go v1.44.35
 )
 
 require (
