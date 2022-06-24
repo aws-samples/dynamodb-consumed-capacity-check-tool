@@ -18,6 +18,7 @@ type Params struct {
 	SortKey      *string
 	TestDataSize *int
 	AwsRegion    *string
+	Workload     *string
 	SeqPK        *bool
 	SeqSK        *bool
 	EnableDax    *bool

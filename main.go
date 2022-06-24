@@ -20,6 +20,7 @@ type Params struct {
 	SortKey      *string
 	TestDataSize *int
 	AwsRegion    *string
+	Workload     *string
 	SeqPK        *bool
 	SeqSK        *bool
 	EnableDax    *bool
@@ -39,6 +40,7 @@ func main() {
 
 	var allReq, successReq, errorReq uint32
 	var putConsumedCapacity, getConsumedCapacity uint64
+
 	ticker(&allReq, &successReq, &errorReq)
 	threadCount := len(testData) / *params.ConcurrentNo
 
@@ -53,20 +55,24 @@ func main() {
 			if i != 0 {
 				threadStartIndex = threadCount * i
 			}
-			fmt.Printf("PUT benchmark test start\n")
-			putResult := lib.PutData(&allReq, &successReq, &errorReq, *params.MaxRequest, *params.TestDataSize,
-				*params.TableName, *params.AwsRegion, *params.EnableDax, *params.DAXEndpoint, testData,
-				threadStartIndex,
-				threadCount)
+			if *params.Workload == "all" || *params.Workload == "write" {
+				fmt.Printf("PUT benchmark test start\n")
+				putResult := lib.PutData(&allReq, &successReq, &errorReq, *params.MaxRequest, *params.TestDataSize,
+					*params.TableName, *params.AwsRegion, *params.EnableDax, *params.DAXEndpoint, testData,
+					threadStartIndex,
+					threadCount)
+				atomic.AddUint64(&putConsumedCapacity, uint64(putResult))
+			}
 
-			atomic.AddUint64(&putConsumedCapacity, uint64(putResult))
+			if *params.Workload == "all" || *params.Workload == "read" {
+				fmt.Printf("GET benchmark test start\n")
+				getResult := lib.GetData(&allReq, &successReq, &errorReq, *params.MaxRequest,
+					*params.TableName, *params.AwsRegion, *params.EnableDax, *params.DAXEndpoint, testData,
+					threadStartIndex, threadCount)
 
-			fmt.Printf("GET benchmark test start\n")
-			getResult := lib.GetData(&allReq, &successReq, &errorReq, *params.MaxRequest,
-				*params.TableName, *params.AwsRegion, testData, threadStartIndex, threadCount)
-
-			atomic.AddUint64(&getConsumedCapacity, uint64(getResult))
-
+				fmt.Println("get consumed capacity is ", getResult)
+				atomic.AddUint64(&getConsumedCapacity, uint64(getResult))
+			}
 			wg.Done()
 		}(i)
 	}
@@ -81,6 +87,8 @@ func main() {
 
 	fmt.Printf("Benchmark total time:%vsec\nAvg throughput:%vreq/sec\n",
 		benchmarkTime.Seconds(), throughput)
+	// Get consumed capacity is float value. but there isn't atomic float type.
+	getConsumedCapacity = getConsumedCapacity / 10
 
 	fmt.Printf("Benchmark total consumend capacity\nPUT:%v\nGET:%v (RoundDown)\n",
 		putConsumedCapacity, getConsumedCapacity)
@@ -95,13 +103,15 @@ func initParams() Params {
 	var params Params
 	params.TableName = flag.String("table", "benchmark", "Use DynamoDB table name")
 	params.EnableDax = flag.Bool("dax", false, "Enable DAX Cluster")
-	params.DAXEndpoint = flag.String("daxendpoint", "dax:sampleEndpoint", "DAX Endpoint")
+	params.DAXEndpoint = flag.String("daxep", "dax://sampleEndpoint", "DAX Endpoint")
 	params.ConcurrentNo = flag.Int("con", 2, "Concurrent Request No")
 	params.MaxRequest = flag.Int("max", 100, "max Request count")
 	params.PartitionKey = flag.String("pk", "pk", "partition key string")
 	params.SortKey = flag.String("sk", "sk", "sort key string")
 	params.TestDataSize = flag.Int("datasize", 16, "test data byte size")
 	params.AwsRegion = flag.String("region", "ap-northeast-1", "Use aws region")
+	params.Workload = flag.String("workload", "all", "workload : all -> read&write, write -> write only, "+
+		"read -> read only")
 	params.SeqPK = flag.Bool("seqpk", false, "bool:generate sequence pk data(ex:PK_1,PK_2...) or fix string")
 	params.SeqSK = flag.Bool("seqsk", false, "bool:generate sequence sk data(ex:SK_1,SK_2...) or fix string")
 
@@ -133,7 +143,7 @@ func printCounter(now time.Time, allReq *uint32, successReq *uint32, errorReq *u
 
 func printParams(params Params) {
 	fmt.Printf("Set params tableName:%v concurrentNo:%v maxRequest:%v"+
-		" partitionKey:%v sortKey:%v awsRegion:%v generatePK:%v generateSK:%v\n",
+		" partitionKey:%v sortKey:%v awsRegion:%v workload:%v daxEndpoint:%v generatePK:%v generateSK:%v\n",
 		*params.TableName, *params.ConcurrentNo, *params.MaxRequest, *params.PartitionKey,
-		*params.SortKey, *params.AwsRegion, *params.SeqPK, *params.SeqSK)
+		*params.SortKey, *params.AwsRegion, *params.Workload, *params.DAXEndpoint, *params.SeqPK, *params.SeqSK)
 }
