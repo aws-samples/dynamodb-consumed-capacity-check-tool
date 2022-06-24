@@ -38,6 +38,8 @@ go build ./
         test data attribute value datasize(random text)  (default 16byte)
   -region string
     	Use aws region (default "ap-northeast-1")
+  -workload string
+    	workload : all(write -> read),write,read (default all)
   -seqpk
     	bool:generate sequence pk data(ex:PK_1,PK_2...) or fix string
   -seqsk
