@@ -127,7 +127,7 @@ func GetData(allReq *uint32, successReq *uint32, errorReq *uint32, maxRequest in
 			atomic.AddUint32(errorReq, 1)
 		} else {
 			atomic.AddUint32(successReq, 1)
-			if result.ConsumedCapacity.CapacityUnits != nil {
+			if result.ConsumedCapacity != nil {
 				// Get consumed capacity is float value. but there isn't atomic float type. So *10 change to int64.
 				getConsumedCapacity = getConsumedCapacity + (*result.ConsumedCapacity.CapacityUnits * 10)
 			}
